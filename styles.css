@@ -96,6 +96,7 @@ body {
     margin-top: 48px;
     display: flex;
     flex-direction: column;
+    
   }
 
   .add-form-name,
@@ -103,12 +104,14 @@ body {
     font-size: 16px;
     font-family: Helvetica;
     border-radius: 8px;
-    border: none;
+    border-width: 1px;
+    border-color: transparent;
   }
 
   .add-form-name {
     width: 300px;
     padding: 11px 22px;
+    
   }
 
   .add-form-text {
@@ -135,3 +138,10 @@ body {
   .add-form-button:hover {
     opacity: 0.9;
   }
+
+  .error {
+    border-color: red;
+    border-width: 4px;
+  }
+
+  
