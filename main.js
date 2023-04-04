@@ -9,7 +9,7 @@ function addComment() {
   if(inputName.value == '') {
     inputName.classList.add('error');
     return;
-  } else if(inputComment.value == '') {
+  }else if(inputComment.value == '') {
     inputComment.classList.add('error');
     return;
   }
@@ -39,16 +39,16 @@ function addComment() {
     </div>
   </div>
 </li>`
+  inputName.value = '';
+  inputComment.value = '';
 }
 
-inputComment.addEventListener('keyup', () => {
+document.addEventListener('keyup', () => {
   if(event.keyCode === 13) {
     addComment();
   }
 })
 
-
 submitButton.addEventListener('click', () => {
   addComment();
 })
-
