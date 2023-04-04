@@ -47,8 +47,6 @@ inputComment.addEventListener('keyup', () => {
   }
 })
 
-
 submitButton.addEventListener('click', () => {
   addComment();
 })
-
