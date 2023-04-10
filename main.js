@@ -30,11 +30,22 @@ const comments = [
 
 
 
+const initCommentCommments = () => {
+  const commentElements = document.querySelectorAll('.comment');
+  for(const commentElement of commentElements) {
+    const index = commentElement.dataset.index;
+    commentElement.addEventListener('click', () => {
+      inputComment.value = `QUOTE_BEGIN ${comments[index].review} \n NAME_START ${comments[index].name} NAME_END  QUOTE_END`;
+    })
+  }
+}
+
 const initLikesButtons = () => {
   const likesButtons = document.querySelectorAll('.like-button');
   for( const likesButton of likesButtons) {
     const index = likesButton.dataset.index;
-    likesButton.addEventListener('click', () => {
+    likesButton.addEventListener('click', (event) => {
+      event.stopPropagation();
       if(!comments[index].clicked) {
         comments[index].clicked = true;
         comments[index].active = '-active-like';
@@ -58,8 +69,8 @@ const initEditButtons = () => {
   const editButtons = document.querySelectorAll('.edit-button');
   for( const editButton of editButtons) {
     const index = editButton.dataset.index;
-    editButton.addEventListener('click', () => {
-      console.log(comments[index]);
+    editButton.addEventListener('click', (event) => {
+      event.stopPropagation();
       comments[index].isEdit == false ? comments[index].isEdit = true : comments[index].isEdit = false;
       renderComment();
     })
@@ -71,10 +82,14 @@ const initSaveButton = () => {
   for(const saveButton of saveButtons) {
     const index = saveButton.dataset.index;
     const editedComment = document.getElementById(`${index}0`);
-    saveButton.addEventListener('click', () => {
+    saveButton.addEventListener('click', (event) => {
+      event.stopPropagation();
       comments[index].review = editedComment.value;
       comments[index].isEdit = false;
       renderComment();
+    })
+    editedComment.addEventListener('click', (event) => {
+      event.stopPropagation();
     })
   }
 }
@@ -82,7 +97,7 @@ const initSaveButton = () => {
 const renderComment = () => {
   const commentsHTML = comments.map((comment, index) => {
     return comment.isEdit == true ? 
-    `<li class="comment">
+    `<li class="comment" data-index="${index}">
     <div class="comment-header">
       <div>${comment.name}</div>
       <div>${comment.date}</div>
@@ -93,13 +108,13 @@ const renderComment = () => {
     <div class="comment-footer">
       <div class="likes">
         <span id="${index}" class="likes-counter">${comment.likes}</span>
-        <button data-index="${index}" data-name="${comment.name}" data-review="${comment.review}" data-likes="${comment.likes}" data-index="${index}" class="like-button ${comment.active}"></button>
+        <button data-index="${index}" data-name="${comment.name}" data-likes="${comment.likes}" data-index="${index}" class="like-button ${comment.active}"></button>
       </div>
     </div>
     <button data-index="${index}" class="save-button" type="button">Сохранить</button>
   </li>`
      :
-   `<li class="comment">
+   `<li class="comment" data-index="${index}">
     <div class="comment-header">
       <div>${comment.name}</div>
       <div>${comment.date}</div>
@@ -112,7 +127,7 @@ const renderComment = () => {
     <div class="comment-footer">
       <div class="likes">
         <span id="${index}" class="likes-counter">${comment.likes}</span>
-        <button data-index="${index}" data-name="${comment.name}" data-review="${comment.review}" data-likes="${comment.likes}" data-index="${index}" class="like-button ${comment.active}"></button>
+        <button data-index="${index}" data-name="${comment.name}" data-likes="${comment.likes}" data-index="${index}" class="like-button ${comment.active}"></button>
       </div>
     </div>
     <button data-index="${index}" class="edit-button" type="button">Редактировать</button>
@@ -124,10 +139,10 @@ const renderComment = () => {
   initLikesButtons();
   initEditButtons();
   initSaveButton();
+  initCommentCommments();
 }
 
 renderComment();
-
 
 function addComment() {
   inputName.classList.remove('error');
@@ -150,8 +165,16 @@ function addComment() {
 
   comments.push(
     {
-      name: inputName.value,
-      review: inputComment.value,
+      name: inputName.value
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;'),
+      review: inputComment.value
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('QUOTE_BEGIN', '<p class="quote">')
+      .replaceAll('QUOTE_END', '</p>')
+      .replaceAll('NAME_START', '<span class="user-name">')
+      .replaceAll('NAME_END', '</span>'),
       date: `${day}.${month}.${date.getFullYear().toString().substr(2,2)} ${date.getHours()}:${date.getMinutes()}`,
       likes: 0,
       isEdit: false,
