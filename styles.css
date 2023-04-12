@@ -32,6 +32,7 @@ body {
     );
     filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
     border-radius: 20px;
+    white-space: pre-line;
   }
 
   .comments {
@@ -168,6 +169,22 @@ body {
   .error {
     border-color: red;
     border-width: 4px;
+  }
+
+  .quote {
+    background-color: white;
+    color: black;
+    font-size: 14px;
+    margin-top: 32px;
+    margin-bottom: 32px;
+    margin-left: 16px;
+    margin-right: 16px;
+    padding: 12px;
+    border-radius: 20px;
+  }
+
+  .user-name {
+    font-weight: bold;
   }
 
   
