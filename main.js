@@ -6,28 +6,55 @@ const likesButtons = document.querySelectorAll('.like-button');
 const editButtons = document.querySelectorAll('.edit-button');
 const saveButtons = document.querySelectorAll('.save-button');
 const editedTextArea = document.querySelectorAll('.edit-text');
+const formElement = document.getElementById('form');
+const loader = document.querySelector('.loading-sign');
 
-const comments = [
-  {
-    name: 'Глеб Фокин',
-    review: 'Это будет первый комментарий на этой странице',
-    date: '12.02.22 12:18',
-    likes: 3,
-    isEdit: false,
-    clicked: false,
-    active: "",
-  },
-  {
-    name: 'Варвара Н.',
-    review: 'Мне нравится как оформлена эта страница! ❤',
-    date: '13.02.22 19:22',
-    likes: 75,
-    isEdit: false,
-    clicked: false,
-    active: "",
+let comments = [];
+
+const toggleLoader = () => {
+  if(isLoading == true) {
+    loader.classList.remove('hidden');
+    formElement.classList.add('hidden');
+  } else {
+    formElement.classList.remove('hidden')
+    loader.classList.add('hidden');
   }
-];
+}
 
+const getData = () => {
+  const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/:sasha-basova/comments", {
+  method: "GET",
+});
+
+fetchPromise.then((response) => {
+  response.json().then((responseData) => {
+    const appComments = responseData.comments.map((comment) => {
+      const date = new Date(comment.date);
+      let day = date.getDate();
+      let month = date.getMonth();
+      let minutes = date.getMinutes();
+      day < 10 ? day = '0' + day : day;
+      month < 10 ? month = '0' + (month + 1) : month;
+      minutes < 10 ? minutes = '0' + minutes : minutes; 
+      return {
+        name: comment.author.name,
+        review: comment.text,
+        date:  `${day}.${month}.${date.getFullYear().toString().substr(2,2)} ${date.getHours()}:${date.getMinutes()}`,
+        likes: 0,
+        isEdit: false,
+        clicked: false,
+        active: "",
+      }
+    });
+    comments = appComments;
+    renderComment();
+    isLoading = false;
+    toggleLoader();
+  })
+})
+}
+
+getData();
 
 
 const initCommentCommments = () => {
@@ -156,35 +183,32 @@ function addComment() {
   }
   
   const date = new Date();
-  let day = date.getDate();
-  let month = date.getMonth();
-  let minutes = date.getMinutes();
-  day < 10 ? day = '0' + day : day;
-  month < 10 ? month = '0' + (month + 1) : month;
-  minutes < 10 ? minutes = '0' + minutes : minutes;  
-
-  comments.push(
-    {
+  console.log('Preparing to post data...');
+ fetch("https://webdev-hw-api.vercel.app/api/v1/:sasha-basova/comments", {
+  method: "POST",
+  body: JSON.stringify({
       name: inputName.value
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;'),
-      review: inputComment.value
+      text: inputComment.value
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;')
       .replaceAll('QUOTE_BEGIN', '<p class="quote">')
       .replaceAll('QUOTE_END', '</p>')
       .replaceAll('NAME_START', '<span class="user-name">')
       .replaceAll('NAME_END', '</span>'),
-      date: `${day}.${month}.${date.getFullYear().toString().substr(2,2)} ${date.getHours()}:${date.getMinutes()}`,
-      likes: 0,
-      isEdit: false,
-      clicked: false,
-    }
-  )
+      date: date,
+      
+  }),
+ }).then(() => {
+  getData();
+  console.log('Posted data, about to get it...');
+ })
 
-  renderComment();
   inputName.value = '';
   inputComment.value = '';
+  isLoading = true;
+  toggleLoader();
 }
 
 document.addEventListener('keyup', () => {
@@ -195,4 +219,6 @@ document.addEventListener('keyup', () => {
 
 submitButton.addEventListener('click', () => {
   addComment();
+  
 })
+

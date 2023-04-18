@@ -187,4 +187,31 @@ body {
     font-weight: bold;
   }
 
+  .loading-sign {
+    height: 46px;
+    color: white;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: transparent;
+    width: 596px;
+    padding-left: 15px;
+    font-size: 16px;
+    background: radial-gradient(
+      75.42% 75.42% at 50% 42.37%,
+      rgba(53, 53, 53, 0) 22.92%,
+      #7334ea 100%
+    );
+    filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
+    border-radius: 20px;
+    white-space: pre-line;
+    padding: 12px;
+    margin-top: 48px;
+    display: flex;
+    flex-direction: column;
+
+  }
+  .hidden {
+    display: none;
+  }
+
   
