@@ -8,50 +8,69 @@ const saveButtons = document.querySelectorAll('.save-button');
 const editedTextArea = document.querySelectorAll('.edit-text');
 const formElement = document.getElementById('form');
 const loader = document.querySelector('.loading-sign');
+const startLoader = document.querySelector('.start-loading-sign');
 
 let comments = [];
 
 const toggleLoader = () => {
-  if(isLoading == true) {
+  if(isLoading == true && isStarting == false) {
     loader.classList.remove('hidden');
+    formElement.classList.add('hidden');
+    startLoader.classList.add('hidden');
+  } else if(isStarting == true && isLoading == true) {
+    startLoader.classList.remove('hidden');
     formElement.classList.add('hidden');
   } else {
     formElement.classList.remove('hidden')
     loader.classList.add('hidden');
+    startLoader.classList.add('hidden');
   }
 }
 
-const getData = () => {
-  const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/:sasha-basova/comments", {
-  method: "GET",
-});
+async function delay(interval = 300) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, interval);
+  });
+}
 
-fetchPromise.then((response) => {
-  response.json().then((responseData) => {
-    const appComments = responseData.comments.map((comment) => {
-      const date = new Date(comment.date);
-      let day = date.getDate();
-      let month = date.getMonth();
-      let minutes = date.getMinutes();
-      day < 10 ? day = '0' + day : day;
-      month < 10 ? month = '0' + (month + 1) : month;
-      minutes < 10 ? minutes = '0' + minutes : minutes; 
-      return {
-        name: comment.author.name,
-        review: comment.text,
-        date:  `${day}.${month}.${date.getFullYear().toString().substr(2,2)} ${date.getHours()}:${date.getMinutes()}`,
-        likes: 0,
-        isEdit: false,
-        clicked: false,
-        active: "",
-      }
-    });
-    comments = appComments;
-    renderComment();
-    isLoading = false;
-    toggleLoader();
+isLoading = true;
+isStarting = true;
+toggleLoader();
+
+async function getData () {
+  return fetch("https://webdev-hw-api.vercel.app/api/v1/:sasha-basova/comments", {
+  method: "GET",
   })
-})
+    .then((response) => {
+      return response.json()
+    })
+    .then((responseData) => {
+      const appComments = responseData.comments.map((comment) => {
+        const date = new Date(comment.date);
+        let day = date.getDate();
+        let month = date.getMonth();
+        let minutes = date.getMinutes();
+        day < 10 ? day = '0' + day : day;
+        month < 10 ? month = '0' + (month + 1) : month;
+        minutes < 10 ? minutes = '0' + minutes : minutes; 
+        return {
+          name: comment.author.name,
+          review: comment.text,
+          date:  `${day}.${month}.${date.getFullYear().toString().substr(2,2)} ${date.getHours()}:${date.getMinutes()}`,
+          likes: 0,
+          isEdit: false,
+          clicked: false,
+          active: "",
+          isAnimated: "",
+        }
+      });
+      comments = appComments;
+      renderComment();
+      isLoading = false;
+      toggleLoader();
+    })
 }
 
 getData();
@@ -73,21 +92,21 @@ const initLikesButtons = () => {
     const index = likesButton.dataset.index;
     likesButton.addEventListener('click', (event) => {
       event.stopPropagation();
-      if(!comments[index].clicked) {
-        comments[index].clicked = true;
-        comments[index].active = '-active-like';
-        comments[index].likes += 1;
-        // likesCounter.textContent++;
-        
-
-      } else {
-        comments[index].clicked = false;
-        comments[index].active = '';
-        comments[index].likes -= 1;
-        // likesCounter.textContent--;
-        
-      }
+      comments[index].isAnimated = '-loading-like';
       renderComment();
+      delay(2000).then(() => {
+        if(!comments[index].clicked) {
+          comments[index].clicked = true;
+          comments[index].active = '-active-like';
+          comments[index].likes += 1;
+        } else {
+          comments[index].clicked = false;
+          comments[index].active = '';
+          comments[index].likes -= 1;
+        }
+        comments[index].isAnimated = '';
+        renderComment();
+      })
     })
   }
 }
@@ -135,7 +154,7 @@ const renderComment = () => {
     <div class="comment-footer">
       <div class="likes">
         <span id="${index}" class="likes-counter">${comment.likes}</span>
-        <button data-index="${index}" data-name="${comment.name}" data-likes="${comment.likes}" data-index="${index}" class="like-button ${comment.active}"></button>
+        <button data-index="${index}" data-name="${comment.name}" data-likes="${comment.likes}" data-index="${index}" class="like-button ${comment.active} ${comment.isAnimated}"></button>
       </div>
     </div>
     <button data-index="${index}" class="save-button" type="button">Сохранить</button>
@@ -154,7 +173,7 @@ const renderComment = () => {
     <div class="comment-footer">
       <div class="likes">
         <span id="${index}" class="likes-counter">${comment.likes}</span>
-        <button data-index="${index}" data-name="${comment.name}" data-likes="${comment.likes}" data-index="${index}" class="like-button ${comment.active}"></button>
+        <button data-index="${index}" data-name="${comment.name}" data-likes="${comment.likes}" data-index="${index}" class="like-button ${comment.active} ${comment.isAnimated}"></button>
       </div>
     </div>
     <button data-index="${index}" class="edit-button" type="button">Редактировать</button>
@@ -184,9 +203,9 @@ function addComment() {
   
   const date = new Date();
   console.log('Preparing to post data...');
- fetch("https://webdev-hw-api.vercel.app/api/v1/:sasha-basova/comments", {
-  method: "POST",
-  body: JSON.stringify({
+  fetch("https://webdev-hw-api.vercel.app/api/v1/:sasha-basova/comments", {
+    method: "POST",
+    body: JSON.stringify({
       name: inputName.value
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;'),
@@ -199,15 +218,21 @@ function addComment() {
       .replaceAll('NAME_END', '</span>'),
       date: date,
       
-  }),
- }).then(() => {
-  getData();
-  console.log('Posted data, about to get it...');
- })
+    }),
+  })
+   .then((response) => {
+     return response.json()
+   })
+   .then((responseData) => {
+    console.log(responseData);
+    console.log('Posted data, about to get it...');
+    return getData();
+   })
 
   inputName.value = '';
   inputComment.value = '';
   isLoading = true;
+  isStarting = false;
   toggleLoader();
 }
 

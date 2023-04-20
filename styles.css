@@ -1,3 +1,18 @@
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(30deg);;
+  }
+  75% {
+    transform: rotate(-30deg);;
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
 body {
     margin: 0;
   }
@@ -187,14 +202,13 @@ body {
     font-weight: bold;
   }
 
-  .loading-sign {
+  .loading {
     height: 46px;
     color: white;
     border-radius: 8px;
     border-width: 1px;
     border-color: transparent;
     width: 596px;
-    padding-left: 15px;
     font-size: 16px;
     background: radial-gradient(
       75.42% 75.42% at 50% 42.37%,
@@ -210,8 +224,17 @@ body {
     flex-direction: column;
 
   }
+
+  .loading p {
+    padding-left: 15px;
+  }
+  
   .hidden {
     display: none;
+  }
+
+  .-loading-like {
+    animation: rotating 2s linear infinite;
   }
 
   
