@@ -44,6 +44,11 @@ async function getData () {
   method: "GET",
   })
     .then((response) => {
+      if(response.status == 400) {
+        throw new Error('Имя и комментарий должны быть не короче 3х символов!');
+      } else if(response.status == 500) {
+        throw new Error('Сервер сломался.. попробуй позже')
+      }
       return response.json()
     })
     .then((responseData) => {
@@ -65,12 +70,25 @@ async function getData () {
           active: "",
           isAnimated: "",
         }
-      });
+      })
       comments = appComments;
+      isLoading = false;
+      toggleLoader();
       renderComment();
+    })
+    .catch((error) => {
+      console.warn(error);
+      if(error.message == 'Сервер сломался.. попробуй позже') {
+        addComment();
+      } else {
+        alert(error.message);
+      }
+     }) 
+    .finally(() => {
       isLoading = false;
       toggleLoader();
     })
+   
 }
 
 getData();
@@ -139,6 +157,7 @@ const initSaveButton = () => {
     })
   }
 }
+
 
 const renderComment = () => {
   const commentsHTML = comments.map((comment, index) => {
@@ -217,10 +236,15 @@ function addComment() {
       .replaceAll('NAME_START', '<span class="user-name">')
       .replaceAll('NAME_END', '</span>'),
       date: date,
-      
+      forceError: true,
     }),
   })
    .then((response) => {
+    if(response.status == 400) {
+      throw new Error('Имя и комментарий должны быть не короче 3х символов!');
+    } else if(response.status == 500) {
+      throw new Error('Сервер сломался.. попробуй позже')
+    }
      return response.json()
    })
    .then((responseData) => {
@@ -228,12 +252,24 @@ function addComment() {
     console.log('Posted data, about to get it...');
     return getData();
    })
-
-  inputName.value = '';
-  inputComment.value = '';
-  isLoading = true;
-  isStarting = false;
-  toggleLoader();
+   .then(() => {
+    inputName.value = '';
+    inputComment.value = '';
+   })
+   .catch((error) => {
+    console.warn(error);
+    isLoading = false;
+    toggleLoader();
+    console.log(error.message);
+    if(error.message == 'Сервер сломался.. попробуй позже') {
+      addComment();
+    } else {
+      alert(error.message);
+    }
+   })
+   isLoading = true;
+   isStarting = false;
+   toggleLoader();
 }
 
 document.addEventListener('keyup', () => {
