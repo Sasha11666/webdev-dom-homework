@@ -1,3 +1,6 @@
+import { gainData, postData } from "./api.js";
+import { renderFunction } from "./renderComment.js";
+
 const submitButton = document.getElementById('submit-button');
 const inputName = document.getElementById('input-name');
 const inputComment = document.getElementById('input-comment');
@@ -12,7 +15,7 @@ const startLoader = document.querySelector('.start-loading-sign');
 
 let comments = [];
 
-const toggleLoader = () => {
+let toggleLoader = () => {
   if(isLoading == true && isStarting == false) {
     loader.classList.remove('hidden');
     formElement.classList.add('hidden');
@@ -35,22 +38,15 @@ async function delay(interval = 300) {
   });
 }
 
-isLoading = true;
-isStarting = true;
+
+export let isLoading = true;
+export let isStarting = true;
 toggleLoader();
 
+
+
 async function getData () {
-  return fetch("https://webdev-hw-api.vercel.app/api/v1/:sasha-basova/comments", {
-  method: "GET",
-  })
-    .then((response) => {
-      if(response.status == 400) {
-        throw new Error('Имя и комментарий должны быть не короче 3х символов!');
-      } else if(response.status == 500) {
-        throw new Error('Сервер сломался.. попробуй позже')
-      }
-      return response.json()
-    })
+    gainData()
     .then((responseData) => {
       const appComments = responseData.comments.map((comment) => {
         const date = new Date(comment.date);
@@ -88,11 +84,10 @@ async function getData () {
       isLoading = false;
       toggleLoader();
     })
-   
+    return comments;
 }
 
 getData();
-
 
 const initCommentCommments = () => {
   const commentElements = document.querySelectorAll('.comment');
@@ -159,47 +154,9 @@ const initSaveButton = () => {
 }
 
 
+
 const renderComment = () => {
-  const commentsHTML = comments.map((comment, index) => {
-    return comment.isEdit == true ? 
-    `<li class="comment" data-index="${index}">
-    <div class="comment-header">
-      <div>${comment.name}</div>
-      <div>${comment.date}</div>
-    </div>  
-    <div class="comment-body">
-      <textarea id="${index}0" class="edit-text" type="textarea"></textarea>
-    </div>
-    <div class="comment-footer">
-      <div class="likes">
-        <span id="${index}" class="likes-counter">${comment.likes}</span>
-        <button data-index="${index}" data-name="${comment.name}" data-likes="${comment.likes}" data-index="${index}" class="like-button ${comment.active} ${comment.isAnimated}"></button>
-      </div>
-    </div>
-    <button data-index="${index}" class="save-button" type="button">Сохранить</button>
-  </li>`
-     :
-   `<li class="comment" data-index="${index}">
-    <div class="comment-header">
-      <div>${comment.name}</div>
-      <div>${comment.date}</div>
-    </div> 
-    <div class="comment-body">
-      <div class="comment-text">
-        ${comment.review}
-      </div>
-    </div>
-    <div class="comment-footer">
-      <div class="likes">
-        <span id="${index}" class="likes-counter">${comment.likes}</span>
-        <button data-index="${index}" data-name="${comment.name}" data-likes="${comment.likes}" data-index="${index}" class="like-button ${comment.active} ${comment.isAnimated}"></button>
-      </div>
-    </div>
-    <button data-index="${index}" class="edit-button" type="button">Редактировать</button>
-  </li>`
-  })
-  .join("");
-  commentsList.innerHTML = commentsHTML;
+  renderFunction(comments, commentsList);
 
   initLikesButtons();
   initEditButtons();
@@ -207,7 +164,9 @@ const renderComment = () => {
   initCommentCommments();
 }
 
+
 renderComment();
+
 
 function addComment() {
   inputName.classList.remove('error');
@@ -219,37 +178,9 @@ function addComment() {
     inputComment.classList.add('error');
     return;
   }
-  
-  const date = new Date();
-  console.log('Preparing to post data...');
-  fetch("https://webdev-hw-api.vercel.app/api/v1/:sasha-basova/comments", {
-    method: "POST",
-    body: JSON.stringify({
-      name: inputName.value
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;'),
-      text: inputComment.value
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('QUOTE_BEGIN', '<p class="quote">')
-      .replaceAll('QUOTE_END', '</p>')
-      .replaceAll('NAME_START', '<span class="user-name">')
-      .replaceAll('NAME_END', '</span>'),
-      date: date,
-      forceError: true,
-    }),
-  })
-   .then((response) => {
-    if(response.status == 400) {
-      throw new Error('Имя и комментарий должны быть не короче 3х символов!');
-    } else if(response.status == 500) {
-      throw new Error('Сервер сломался.. попробуй позже')
-    }
-     return response.json()
-   })
-   .then((responseData) => {
-    console.log(responseData);
-    console.log('Posted data, about to get it...');
+
+   postData(inputName, inputComment)
+   .then(() => {
     return getData();
    })
    .then(() => {
@@ -259,8 +190,7 @@ function addComment() {
    .catch((error) => {
     console.warn(error);
     isLoading = false;
-    toggleLoader();
-    console.log(error.message);
+    toggleLoader( );
     if(error.message == 'Сервер сломался.. попробуй позже') {
       addComment();
     } else {
@@ -283,3 +213,5 @@ submitButton.addEventListener('click', () => {
   
 })
 
+
+export {getData}
