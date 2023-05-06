@@ -10,12 +10,14 @@
       <ul class="comments" id="comments-list">
         <!-- List of comments is rendered from js -->
       </ul>
-      <div class="add-form"  id="form">
+      <div id="authorisation"></div>
+      <div class="add-form hidden"  id="form">
         <input
           type="text"
           class="add-form-name"
           placeholder="Введите ваше имя"
           id="input-name"
+          
         />
         <textarea
           type="textarea"
@@ -31,10 +33,11 @@
       <div class=" loading loading-sign hidden">
         <p>Комментарий загружается...</p>
       </div>
-      <div class=" loading start-loading-sign  hidden">
+      <div class=" loading start-loading-sign">
         <p>Пожалуйста, подождите. Лента комментариев скоро загрузится...</p>
       </div>
     </div>
+    
   </body>
 
   <script type="module" src="main.js"></script>
