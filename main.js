@@ -1,5 +1,6 @@
 import { gainData, postData, loginUser, postLikesData, deleteComment } from "./api.js";
-import {renderLoginComponent} from './components/login-component.js'
+import {renderLoginComponent} from './components/login-component.js';
+import { format } from 'date-fns';
 
 
 const submitButton = document.getElementById('submit-button');
@@ -54,17 +55,19 @@ async function getData () {
     gainData({token})
     .then((responseData) => {
       const appComments = responseData.comments.map((comment) => {
-        const date = new Date(comment.date);
-        let day = date.getDate();
-        let month = date.getMonth();
-        let minutes = date.getMinutes();
-        day < 10 ? day = '0' + day : day;
-        month < 10 ? month = '0' + (month + 1) : month;
-        minutes < 10 ? minutes = '0' + minutes : minutes; 
+        const createDate = format(new Date(comment.date), 'dd/MM/yyyy hh:mm');
+        // const date = new Date(comment.date);
+        // let day = date.getDate();
+        // let month = date.getMonth();
+        // let minutes = date.getMinutes();
+        // day < 10 ? day = '0' + day : day;
+        // month < 10 ? month = '0' + (month + 1) : month;
+        // minutes < 10 ? minutes = '0' + minutes : minutes; 
         return {
           name: comment.author.name,
           review: comment.text,
-          date:  `${day}.${month}.${date.getFullYear().toString().substr(2,2)} ${date.getHours()}:${date.getMinutes()}`,
+          // date:  `${day}.${month}.${date.getFullYear().toString().substr(2,2)} ${date.getHours()}:${date.getMinutes()}`,
+          date: `${createDate}`,
           likes: comment.likes,
           isLiked: comment.isLiked,
           isEdit: false,
