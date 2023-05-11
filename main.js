@@ -131,21 +131,6 @@ const initLikesButtons = () => {
       let likes = comments[index].likes;
       let isLiked = comments[index].isLiked;
       postLikesData({id, likes, isLiked, token});
-      // comments[index].isAnimated = '-loading-like';
-      // renderComment();
-      // delay(2000).then(() => {
-      //   if(!comments[index].clicked) {
-      //     comments[index].clicked = true;
-      //     comments[index].active = '-active-like';
-      //     comments[index].likes += 1;
-      //   } else {
-      //     comments[index].clicked = false;
-      //     comments[index].active = '';
-      //     comments[index].likes -= 1;
-      //   }
-      //   comments[index].isAnimated = '';
-      //   renderComment();
-      // })
     })
   }
 }
