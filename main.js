@@ -1,5 +1,6 @@
 import { gainData, postData, loginUser, postLikesData, deleteComment } from "./api.js";
-import {renderLoginComponent} from './components/login-component.js'
+import {renderLoginComponent} from './components/login-component.js';
+import { format } from 'date-fns';
 
 
 const submitButton = document.getElementById('submit-button');
@@ -13,6 +14,7 @@ const editedTextArea = document.querySelectorAll('.edit-text');
 const formElement = document.getElementById('form');
 const loader = document.querySelector('.loading-sign');
 const startLoader = document.querySelector('.start-loading-sign');
+
 
 let comments = [];
 let token = "Bearer asb4c4boc86gasb4c4boc86g37k3bk3cg3c03ck3k37w3cc3bo3b8";
@@ -54,17 +56,18 @@ async function getData () {
     gainData({token})
     .then((responseData) => {
       const appComments = responseData.comments.map((comment) => {
-        const date = new Date(comment.date);
-        let day = date.getDate();
-        let month = date.getMonth();
-        let minutes = date.getMinutes();
-        day < 10 ? day = '0' + day : day;
-        month < 10 ? month = '0' + (month + 1) : month;
-        minutes < 10 ? minutes = '0' + minutes : minutes; 
+        const createDate = format(new Date(comment.date), 'yyyy-MM-dd hh.mm.ss');
+        // const date = new Date(comment.date);
+        // let day = date.getDate();
+        // let month = date.getMonth();
+        // let minutes = date.getMinutes();
+        // day < 10 ? day = '0' + day : day;
+        // month < 10 ? month = '0' + (month + 1) : month;
+        // minutes < 10 ? minutes = '0' + minutes : minutes; 
         return {
           name: comment.author.name,
           review: comment.text,
-          date:  `${day}.${month}.${date.getFullYear().toString().substr(2,2)} ${date.getHours()}:${date.getMinutes()}`,
+          date: createDate,
           likes: comment.likes,
           isLiked: comment.isLiked,
           isEdit: false,
@@ -128,21 +131,6 @@ const initLikesButtons = () => {
       let likes = comments[index].likes;
       let isLiked = comments[index].isLiked;
       postLikesData({id, likes, isLiked, token});
-      // comments[index].isAnimated = '-loading-like';
-      // renderComment();
-      // delay(2000).then(() => {
-      //   if(!comments[index].clicked) {
-      //     comments[index].clicked = true;
-      //     comments[index].active = '-active-like';
-      //     comments[index].likes += 1;
-      //   } else {
-      //     comments[index].clicked = false;
-      //     comments[index].active = '';
-      //     comments[index].likes -= 1;
-      //   }
-      //   comments[index].isAnimated = '';
-      //   renderComment();
-      // })
     })
   }
 }
